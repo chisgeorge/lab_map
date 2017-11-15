@@ -85,7 +85,7 @@ public class NotaService{
     }
     public void saveIdStudent(int idStudent, int numarTema,int nota, int deadline, int saptamanaPredarii, String observatii) {
         try {
-            File dir = new File("../Students/");
+            //File dir = new File("../Students/");
             File file = new File(dir.getCanonicalFile(), "" + idStudent + ".txt");
             if (!file.exists())
                 file.createNewFile();
