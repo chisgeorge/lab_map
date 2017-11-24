@@ -1,26 +1,22 @@
-package UI;
+package UI.Console;
 
 import Domain.Nota;
 import Domain.Student;
 import Domain.Tema;
 import Domain.PairID;
-import javafx.util.Pair;
-import repository.NotaFileRepository;
-import repository.StudentFileRepository;
-import repository.TemeFileRepository;
+import repository.FileRepository.NotaFileRepository;
+import repository.FileRepository.StudentFileRepository;
+import repository.FileRepository.TemeFileRepository;
 import Service.NotaService;
 import Service.StudentService;
 import Service.TemeService;
-import UI.Menu.Command;
-import UI.Menu.MenuCommand;
+import UI.Console.Menu.*;
 import Validator.ValidatorTeme;
 import Validator.ValidatorStudent;
 import Validator.ValidationException;
 import Validator.ValidatorNota;
 
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
+import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 
@@ -35,7 +31,7 @@ public class Console {
 
     private MenuCommand mainMenu;
 
-    Scanner scanner = new Scanner(System.in);
+    private Scanner scanner = new Scanner(System.in);
 
     public class ReadStudentCommand implements Command{
         @Override
@@ -179,6 +175,7 @@ public class Console {
             numarTema = scanner.nextInt();
             System.out.println("Intoduceti nota =");
             nota = scanner.nextInt();
+            scanner.nextLine();
             System.out.println("Introduceti observatii(optional) =");
             observatii = scanner.nextLine();
             if(observatii.equals(""))
@@ -202,7 +199,11 @@ public class Console {
             System.out.print("Introduceti  numar tema =");
             numarTema = scanner.nextInt();
 
-            controllerTeme.delete(numarTema);
+            try {
+                controllerTeme.delete(numarTema);
+            } catch (ValidationException e) {
+                e.printStackTrace();
+            }
             System.out.println("S-a sters  tema ");
 
         }
@@ -218,7 +219,11 @@ public class Console {
             System.out.println("Introduceti numar tema = ");
             numarTema = scanner.nextInt();
 
-            controllerNote.delete(new PairID<Integer,Integer>(idStudent,numarTema));
+            try {
+                controllerNote.delete(new PairID<Integer,Integer>(idStudent,numarTema));
+            } catch (ValidationException e) {
+                e.printStackTrace();
+            }
             System.out.println("S-a sters  nota ");
 
         }
@@ -227,17 +232,117 @@ public class Console {
     private class DeleteStudentCommand implements Command {
         @Override
         public void execute() {
-            int idStudent, grupaStudent;
-            String nume, email, cadruDidactic;
+            int idStudent;
 
             System.out.print("Introduceti  id student = ");
             idStudent = scanner.nextInt();
 
-            controllerStudent.delete(idStudent);
+            try {
+                controllerStudent.delete(idStudent);
+            } catch (ValidationException e) {
+                e.printStackTrace();
+            }
             System.out.println("Studentul a fost sters. \n");
 
         }
     }
+    private class FiltruStudentIntre implements Command{
+        @Override
+        public void execute() {
+            int grupaStudentInceput,grupaStudentSfarsit;
+            System.out.println("Intoduceti grupa de inceput = ");
+            grupaStudentInceput = scanner.nextInt();
+            System.out.println("Intoduceti grupa de sfarsit = ");
+            grupaStudentSfarsit = scanner.nextInt();
+            List<Student> filtered = controllerStudent.filtruStudentiIntreGrupele(grupaStudentInceput,grupaStudentSfarsit);
+            filtered.forEach(student -> System.out.println(student.toString()));
+        }
+    }
+    private class FiltruStudentEmail implements Command{
+        @Override
+        public void execute() {
+            String contains;
+            scanner.nextLine();
+            System.out.println("String email = ");
+            contains = scanner.nextLine();
+            List<Student> filtered = controllerStudent.filtruStudentiContineEmail(contains);
+            filtered.forEach(student -> System.out.println(student.toString()));
+        }
+    }
+    private class FiltruStudentCadru implements Command{
+        @Override
+        public void execute() {
+            String contains;
+            scanner.nextLine();
+            System.out.println("String cadru = ");
+            contains = scanner.nextLine();
+            List<Student> filtered = controllerStudent.filtruStudentiCareAuCadru(contains);
+            filtered.forEach(student -> System.out.println(student.toString()));
+        }
+    }
+    private class FiltruTemaDeadline implements Command{
+        @Override
+        public void execute() {
+            int deadline;
+            System.out.println("Dati saptamana deadline = ");
+            deadline = scanner.nextInt();
+            List<Tema> filtered = controllerTeme.filtruTemaPanaLaDeadline(deadline);
+            filtered.forEach(tema -> System.out.println(tema.toString()));
+        }
+    }
+    private class FiltruTemaText implements Command{
+        @Override
+        public void execute() {
+            String contains;
+            scanner.nextLine();
+            System.out.println("String text = ");
+            contains = scanner.nextLine();
+            List<Tema> filtered = controllerTeme.filtruTemaContineinText(contains);
+            filtered.forEach(tema -> System.out.println(tema.toString()));
+        }
+    }
+    private class FiltruTemaID implements Command{
+        @Override
+        public void execute() {
+            int idInceput,idSfarsit;
+            System.out.println("Intoduceti id de inceput = ");
+            idInceput = scanner.nextInt();
+            System.out.println("Intoduceti id de sfarsit = ");
+            idSfarsit = scanner.nextInt();
+            List<Tema> filtered = controllerTeme.filtruTemaCuIDintre(idInceput,idSfarsit);
+            filtered.forEach(tema -> System.out.println(tema.toString()));
+        }
+    }
+    private class FiltruNotaSaptamana implements Command{
+        @Override
+        public void execute() {
+            int saptamana;
+            System.out.println("Intoduceti saptamana = ");
+            saptamana = scanner.nextInt();
+            List<Nota> filtered = controllerNote.filtruNotaPredataInainteDe(saptamana);
+            filtered.forEach(nota -> System.out.println(nota.toString()));
+        }
+    }
+    private class FiltruNotaIntre implements Command{
+        @Override
+        public void execute() {
+            int notaInceput,notaSfarsit;
+            System.out.println("Intoduceti nota de inceput = ");
+            notaInceput = scanner.nextInt();
+            System.out.println("Intoduceti nota de sfarsit = ");
+            notaSfarsit = scanner.nextInt();
+            List<Nota> filtered = controllerNote.filtruNotaIntre(notaInceput,notaSfarsit);
+            filtered.forEach(nota -> System.out.println(nota.toString()));
+        }
+    }
+    private class FiltruNotaPredata implements Command{
+        @Override
+        public void execute() {
+            List<Nota> filtered = controllerNote.filtruNotaPredataLaTimp();
+            filtered.forEach(nota -> System.out.println(nota.toString()));
+        }
+    }
+
 
     private void createMenu()
     {
@@ -245,7 +350,7 @@ public class Console {
         MenuCommand crudStudent =new MenuCommand("Operatii CRUD Student");
         MenuCommand crudTema = new MenuCommand("Operatii CRUD Tema de laborator");
         MenuCommand crudNota = new MenuCommand("Operatii CRUD Note");
-
+        MenuCommand filtre = new MenuCommand("Filtre");
         crudStudent.addCommand("0. Back to main menu " , mainMenu);
         crudStudent.addCommand("1. Add Student" , new ReadStudentCommand());
         crudStudent.addCommand("2. Update Student" , new UpdateStudentCommand());
@@ -261,10 +366,22 @@ public class Console {
         crudNota.addCommand("2. Update nota", new UpdateNotaCommand());
         crudNota.addCommand("3. Delete nota", new DeleteNotaCommand());
 
+        filtre.addCommand("0. Back to main menu", mainMenu);
+        filtre.addCommand("1. Filtrare Studenti intre grupele", new FiltruStudentIntre());
+        filtre.addCommand("2. Filtrare Studenti care contin in email", new FiltruStudentEmail());
+        filtre.addCommand("3. Filtrare Studenti care au cadrul didactic", new FiltruStudentCadru());
+        filtre.addCommand("4. Filtrare Teme pana la deadline", new FiltruTemaDeadline());
+        filtre.addCommand("5. Filtrare Teme care contin in enunt", new FiltruTemaText());
+        filtre.addCommand("6. Filtrare Teme cu ID-uri intre", new FiltruTemaID());
+        filtre.addCommand("7. Filtrare Nota predata inainte de saptamana",new FiltruNotaSaptamana());
+        filtre.addCommand("8. Filtrare Nota intre",new FiltruNotaIntre());
+        filtre.addCommand("9. Filtrare Nota care au fost predate la timp", new FiltruNotaPredata());
+
         mainMenu.addCommand("0 Exit" ,()-> {System.exit(0);});
         mainMenu.addCommand("1 Crud Student", crudStudent);
         mainMenu.addCommand("2 Crud Tema de laborator", crudTema);
         mainMenu.addCommand("3 Crud Nota", crudNota);
+        mainMenu.addCommand("4 Filtre", filtre);
 
 
         //mainMenu.addCommand("3 Exit" , new ExitCommand());
@@ -274,18 +391,24 @@ public class Console {
         createMenu();
         MenuCommand crtMenu = mainMenu;
         while (true) {
-            System.out.println(crtMenu.getMenuName());
-            System.out.println("-----------------------");
-            crtMenu.execute();
-            System.out.println("Optiunea d-voastra >>");
-            int actionNumber = scanner.nextInt();
-            if (actionNumber > -1 && actionNumber <= crtMenu.getCommands().size()) {
-                Command selectedCommand = crtMenu.getCommands().get(actionNumber);
-                if (selectedCommand instanceof MenuCommand)
-                    crtMenu = (MenuCommand) selectedCommand;
-                else selectedCommand.execute();
+            try {
+                System.out.println(crtMenu.getMenuName());
+                System.out.println("-----------------------");
+                crtMenu.execute();
+                System.out.println("Optiunea d-voastra >>");
+                int actionNumber = scanner.nextInt();
+                if (actionNumber > -1 && actionNumber <= crtMenu.getCommands().size()) {
+                    Command selectedCommand = crtMenu.getCommands().get(actionNumber);
+                    if (selectedCommand instanceof MenuCommand)
+                        crtMenu = (MenuCommand) selectedCommand;
+                    else selectedCommand.execute();
+                } else System.out.println("Optiunea nu este valida!");
+            }catch (InputMismatchException ex)
+            {
+                System.out.println("Datele au fost introduse eronat");
+                scanner.next();
+
             }
-            else System.out.println("Optiunea nu este valida!");
         }
     }
 

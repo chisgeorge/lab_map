@@ -1,5 +1,6 @@
 package repository;
 
+import Domain.HasID;
 import Validator.Validator;
 import Validator.ValidationException;
 
@@ -9,7 +10,7 @@ public abstract class AbstractRepository <E extends HasID<ID>, ID> implements Re
     private TreeMap<ID, E> entities = new TreeMap<ID, E>();
     private Validator<E> validator;
 
-    AbstractRepository(Validator<E> validator){
+    public AbstractRepository(Validator<E> validator){
         this.validator = validator;
     }
 
@@ -42,8 +43,12 @@ public abstract class AbstractRepository <E extends HasID<ID>, ID> implements Re
      * @return removed element
      */
     @Override
-    public void delete(ID id) {
-        entities.remove(id);
+    public void delete(ID id) throws ValidationException {
+
+        if (entities.containsKey(id)) {
+            entities.remove(id);
+        }
+        else throw new ValidationException("ID-ul nu exista");
     }
 
     @Override
@@ -52,6 +57,7 @@ public abstract class AbstractRepository <E extends HasID<ID>, ID> implements Re
         if (entities.containsKey(entity.getId())) {
             entities.put(entity.getId(), entity);
         }
+        else throw new ValidationException("ID-ul nu exista");
 
     }
     /**

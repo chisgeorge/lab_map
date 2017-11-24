@@ -1,7 +1,5 @@
 package Domain;
 
-import repository.HasID;
-
 public class Student implements HasID<Integer> {
 
     private Integer idStudent;

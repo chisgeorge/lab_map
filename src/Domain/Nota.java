@@ -1,10 +1,7 @@
 package Domain;
 
-import repository.HasID;
-import javafx.util.Pair;
-
 public class Nota implements HasID<PairID<Integer,Integer>>{
-    PairID<Integer, Integer> id;
+    private PairID<Integer, Integer> id;
     private int saptPreluare;
     private int nota;
 
@@ -62,5 +59,14 @@ public class Nota implements HasID<PairID<Integer,Integer>>{
         result = 31 * result + saptPreluare;
         result = 31 * result + nota;
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "Nota{" +
+                "idNota=" +  id.getKey() + "," + id.getValue() +
+                ", saptPreluare=" + saptPreluare  +
+                ", nota=" + nota +
+                '}';
     }
 }

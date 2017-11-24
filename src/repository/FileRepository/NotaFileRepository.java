@@ -1,15 +1,19 @@
-package repository;
+package repository.FileRepository;
 
 import Domain.Nota;
 import Domain.PairID;
 import Validator.Validator;
 import Validator.ValidationException;
-import javafx.util.Pair;
+import repository.InMemory.InMemoryNotaRepository;
 
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.stream.Stream;
 
-public class NotaFileRepository extends InMemoryNotaRepository{
+public class NotaFileRepository extends InMemoryNotaRepository {
     private String fileName;
 
     public NotaFileRepository(Validator<Nota> validator, String fileName) {
@@ -23,24 +27,27 @@ public class NotaFileRepository extends InMemoryNotaRepository{
      *  Read data from file
      */
     private void readFromFile(){
-        try (BufferedReader in = new BufferedReader(new FileReader(fileName))) {
-            String line;
-
-            while ((line = in.readLine()) != null){
+        Path path = Paths.get(fileName);
+        Stream<String> lines;
+        try{
+            lines = Files.lines(path);
+            lines.forEach(line->{
                 String[] fields = line.split(";");
                 PairID<Integer, Integer> id= new PairID<Integer,Integer>(Integer.parseInt(fields[0]),Integer.parseInt(fields[1]));
                 int SaptPreluare = Integer.parseInt(fields[2]);
                 int nota = Integer.parseInt(fields[3]);
 
                 Nota nota_object = new Nota(id,  nota, SaptPreluare);
-                super.save(nota_object);
-            }
+                try {
+                    super.save(nota_object);
+                }catch (ValidationException e) {
+                    System.out.println("Date eronate citite.");
+                }
+            });
         } catch (FileNotFoundException e) {
             System.out.println("Fisierul nu a fost gasit.");
         } catch (IOException e) {
             System.out.println("I/O Error.");
-        } catch (ValidationException e) {
-            System.out.println("Date eronate citite.");
         }
     }
 
@@ -51,7 +58,8 @@ public class NotaFileRepository extends InMemoryNotaRepository{
         try (BufferedWriter out = new BufferedWriter(new FileWriter(fileName, false))) {
             super.getAll().forEach(nota -> {
                 try {
-                    out.write(nota.getId().getKey() + ";" + nota.getId().getValue() + ";" +
+                    out.write(nota.getId().getKey() + ";" +
+                            nota.getId().getValue() + ";" +
                             String.valueOf(nota.getSaptPreluare()) + ";" +
                             String.valueOf(nota.getNota()) + "\n");
                 } catch (IOException e) {
@@ -79,7 +87,7 @@ public class NotaFileRepository extends InMemoryNotaRepository{
      * @param id represents id of entry
      */
     @Override
-    public void delete(PairID<Integer,Integer> id) {
+    public void delete(PairID<Integer,Integer> id) throws ValidationException{
         super.delete(id);
         saveToFile();
     }

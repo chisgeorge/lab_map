@@ -1,4 +1,4 @@
-package UI.Menu;
+package UI.Console.Menu;
 
 import java.util.List;
 import java.util.Map;

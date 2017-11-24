@@ -1,8 +1,9 @@
-package repository;
+package repository.FileRepository;
 
 import Domain.Student;
 import Validator.Validator;
 import Validator.ValidationException;
+import repository.InMemory.InMemoryStudentRepository;
 
 
 import java.io.*;
@@ -43,7 +44,8 @@ public class StudentFileRepository extends InMemoryStudentRepository {
                     super.save(student);
                 } catch (ValidationException e) {
                     System.out.println("Date eronate citite.");
-                }});
+                }
+            });
             } catch (IOException e) {
                 System.out.println("I/O Error.");
         }
@@ -86,7 +88,7 @@ public class StudentFileRepository extends InMemoryStudentRepository {
      * @param id represents id of entry
      */
     @Override
-    public void delete(Integer id) {
+    public void delete(Integer id) throws ValidationException {
         super.delete(id);
         saveToFile();
     }

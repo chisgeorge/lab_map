@@ -1,7 +1,5 @@
 package Domain;
 
-import repository.HasID;
-
 public class Tema implements HasID<Integer>{
 
     private Integer numarTema;

@@ -1,4 +1,5 @@
-5;cerintaUpdatata;6;
-8;cmmmc;3;
-19;2 progra,e;10;
-34;rtpe;12;1
+5;Cerinta updatata;4;
+6;Cerinta de abstractizare Repository;5;
+7;Cerinta pentru Tema;6;
+8;Cerinta de implementare UI;8;
+9;Cerinta de implementare GUI;10;

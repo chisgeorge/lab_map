@@ -13,9 +13,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Calendar;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class NotaService{
 
@@ -49,7 +47,7 @@ public class NotaService{
         else
         if(tema.getDeadline() - saptamanaCurenta < 0)
             nota.setNota(nota.getNota() - (saptamanaCurenta - tema.getDeadline()) * 2);
-
+        nota.setSaptPreluare(saptamanaCurenta);
         saveIdStudent(nota.getId().getKey(), tema.getId(), nota.getNota(), tema.getDeadline(), saptamanaCurenta, observatie);
         repository.save(nota);
     }
@@ -57,12 +55,12 @@ public class NotaService{
     // Return a set with all entries
     public Set<Nota> getAll(){
         Set<Nota> all = new HashSet<>();
-        repository.getAll().forEach(nota -> all.add(nota));
+        repository.getAll().forEach(all::add);
         return all;
     }
 
     // Delete an entry by a given id
-    public void delete(PairID<Integer, Integer> id ){
+    public void delete(PairID<Integer, Integer> id ) throws ValidationException{
         repository.delete(id);
     }
 
@@ -76,25 +74,36 @@ public class NotaService{
             throw new ValidationException("Studentul nu are nota la laboratorul acesta. \n");
 
         Nota notaCurenta = repository.findOne(nota.getId());
-
+        Tema tema = repository_t.findOne(nota.getId().getValue());
+        if(tema.getDeadline() - saptamanaCurenta < -2)
+            nota.setNota(1);
+        else
+        if(tema.getDeadline() - saptamanaCurenta < 0)
+            nota.setNota(nota.getNota() - (saptamanaCurenta - tema.getDeadline()) * 2);
         if(notaCurenta.getNota() < nota.getNota()){
-            Tema tema = repository_t.findOne(nota.getId().getValue());
             updateIdStudent(nota.getId().getKey(), tema.getId(), nota.getNota(), tema.getDeadline(), saptamanaCurenta, observatie);
             repository.update(nota);
         }
     }
     public void saveIdStudent(int idStudent, int numarTema,int nota, int deadline, int saptamanaPredarii, String observatii) {
         try {
-            File dir = new File("../Students/");
-            File file = new File(dir.getCanonicalFile(), "" + idStudent + ".txt");
-            if (!file.exists())
-                file.createNewFile();
+            File path = new File("./Students/", "" + idStudent + ".txt");
+            //File file = new File(path.getCanonicalPath());
+            //System.out.println(file.getCanonicalPath());
+            if (!path.exists())
+            {
+            //path.getParentFile().mkdirs();
+            if(!path.createNewFile())
+            //nu a fost creat fisierul
+                ;
 
-            try(BufferedWriter out = new BufferedWriter(new FileWriter(file.getCanonicalFile(), true))){
-                out.write("Adaugare nota, " +
-                        String.valueOf(numarTema) + ", " +
-                        String.valueOf(nota) + ", " +
-                        String.valueOf(deadline) + ", " +
+            }
+
+            try(BufferedWriter out = new BufferedWriter(new FileWriter(path, true))){
+                out.write("Adaugare nota, " + " Numar tema: " +
+                        String.valueOf(numarTema) + ", nota:" +
+                        String.valueOf(nota) + ", deadline:" +
+                        String.valueOf(deadline) + ", saptamana predarii:" +
                         String.valueOf(saptamanaPredarii) + ", " +
                         observatii + "\n");
             }catch (IOException e) {
@@ -105,18 +114,24 @@ public class NotaService{
         }
     }
 
-    public void updateIdStudent(int idStudent, int numarTema,int nota, int deadline, int saptamanaPredarii, String observatii) {
-        String pathFile = "../Students/" + idStudent + ".txt";
-        File file = new File(pathFile).getAbsoluteFile();
+    private void updateIdStudent(int idStudent, int numarTema,int nota, int deadline, int saptamanaPredarii, String observatii) {
         try {
-            if (!file.exists())
-                file.createNewFile();
+            File path = new File("./Students/", "" + idStudent + ".txt");
+            //File file = new File(path.getCanonicalPath());
+            //System.out.println(file.getCanonicalPath());
+            if (!path.exists())
+            {
+                //path.getParentFile().mkdirs();
+                if(!path.createNewFile())
+                    //
+                    ;
+            }
 
-            try(BufferedWriter out = new BufferedWriter(new FileWriter(file.getAbsolutePath(), true))){
-                out.write("Modificare nota, " +
-                        String.valueOf(numarTema) + ", " +
-                        String.valueOf(nota) + ", " +
-                        String.valueOf(deadline) + ", " +
+            try(BufferedWriter out = new BufferedWriter(new FileWriter(path, true))){
+                out.write("Modificare nota, "+ " Numar tema: " +
+                        String.valueOf(numarTema) + ", nota:" +
+                        String.valueOf(nota) + ", deadline:" +
+                        String.valueOf(deadline) + ", saptamana predarii:" +
                         String.valueOf(saptamanaPredarii) + ", " +
                         observatii + "\n");
             }catch (IOException e) {
@@ -125,5 +140,23 @@ public class NotaService{
         }catch (IOException e){
             e.printStackTrace();
         }
+    }
+   public List<Nota> filtruNotaPredataInainteDe(int saptamana)
+   {
+       List<Nota> all = new ArrayList<>();
+       all.addAll((Collection<? extends Nota>) repository.getAll());
+       return Filter.filterAndSorter(all,Filter.NotaPredataInainteDe(saptamana),Comparator.comparing(Nota::getId));
+   }
+   public List<Nota> filtruNotaIntre (int notaInceput, int notaSfarsit )
+   {
+       List<Nota> all = new ArrayList<>();
+       all.addAll((Collection<? extends Nota>) repository.getAll());
+       return Filter.filterAndSorter(all,Filter.NotaIntre(notaInceput,notaSfarsit),Comparator.comparing(Nota::getId));
+   }
+    public List<Nota> filtruNotaPredataLaTimp ()
+    {
+        List<Nota> all = new ArrayList<>();
+        all.addAll((Collection<? extends Nota>) repository.getAll());
+        return Filter.filterAndSorter(all,Filter.NotaPredataLaTimp(repository_t),Comparator.comparing(Nota::getId));
     }
 }

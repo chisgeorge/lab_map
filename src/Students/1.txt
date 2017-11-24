@@ -1,2 +1,0 @@
-Adaugare nota, 5, 1, 2, 5, null
-Modificare nota, 5, 6, 2, 5, a reparat repo

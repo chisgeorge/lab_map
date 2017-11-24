@@ -1,10 +1,15 @@
-package repository;
+package repository.FileRepository;
 
 import Domain.Tema;
 import Validator.Validator;
 import Validator.ValidationException;
+import repository.InMemory.InMemoryTemeRepository;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.stream.Stream;
 
 public class TemeFileRepository extends InMemoryTemeRepository {
 
@@ -19,12 +24,12 @@ public class TemeFileRepository extends InMemoryTemeRepository {
 
 
     private void readFromFile()  {
-        try (BufferedReader in = new BufferedReader(new FileReader(fileName))) {
-            String line;
-
-            while ((line = in.readLine()) != null){
+        Path path = Paths.get(fileName);
+        Stream<String> lines;
+        try{
+            lines = Files.lines(path);
+            lines.forEach(line->{
                 String[] fields = line.split(";");
-
                 int numarTema = Integer.parseInt(fields[0]);
                 String cerintaTema = fields[1];
                 int deadline = Integer.parseInt(fields[2]);
@@ -34,7 +39,7 @@ public class TemeFileRepository extends InMemoryTemeRepository {
                 }catch (ValidationException e) {
                     System.out.println("Date eronate citite.");
                 }
-            }
+            });
         } catch (FileNotFoundException e) {
             System.out.println("Fisierul nu a fost gasit.");
         } catch (IOException e) {
@@ -79,7 +84,7 @@ public class TemeFileRepository extends InMemoryTemeRepository {
      * @return that entry that was removed
      */
     @Override
-    public void delete(Integer id) {
+    public void delete(Integer id) throws ValidationException{
         super.delete(id);
         saveToFile();
     }

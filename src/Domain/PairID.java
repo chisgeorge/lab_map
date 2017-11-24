@@ -52,7 +52,10 @@ public class PairID<K extends Comparable<? super K>,V extends Comparable<? super
         if( this.key.compareTo(o.getKey()) < 0)
             return -1;
         return 0;*/
-        return Integer.compare(this.key.compareTo(o.getKey()), 0) != 0 ? Integer.compare(this.key.compareTo(o.getKey()), 0) : Integer.compare(this.value.compareTo(o.getValue()), 0);
+        if(Integer.compare(this.key.compareTo(o.getKey()), 0) != 0 )
+            return Integer.compare(this.key.compareTo(o.getKey()), 0);
+        else
+            return Integer.compare(this.value.compareTo(o.getValue()), 0);
     }
 
 }

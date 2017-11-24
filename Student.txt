@@ -1,5 +1,7 @@
 4;Alex;222;alex@gmail.com;bogdan
-7;CRISTI;225;andrei@gmail.com;ioan
-10;19;222;klkl;pjkk
+7;Cristi;225;andrei@gmail.com;ioan
+10;Razvan;226;razvan@email.com;rares
 15;Andrei;225;andrei@gmail.com;ioan
 16;George;227;george@gmail.com;mircea
+20;Tyrone;221;tyrone@gmail.com;mircea
+22;Rares;224;rares@gmail.com;rares
